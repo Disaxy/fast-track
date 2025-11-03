@@ -13,13 +13,13 @@ func main() {
 
 	newUser, err := userUsecase.CreateUser("Roma", "test@mail.com", "admin")
 	if err != nil {
-		slog.Error("Error", err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 
 	user, err := userUsecase.GetUser(newUser.ID)
 	if err != nil {
-		slog.Error("Error", err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 
@@ -28,7 +28,7 @@ func main() {
 
 	err = userUsecase.RemoveUser(user.ID)
 	if err != nil {
-		slog.Error("Error", err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 

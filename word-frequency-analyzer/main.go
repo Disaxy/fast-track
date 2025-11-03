@@ -97,13 +97,13 @@ func printTop10(sortedWordCount []kv) {
 func main() {
 	filePath, err := getFilePath()
 	if err != nil {
-		slog.Error("Error", err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 
 	file, err := openFile(filePath)
 	if err != nil {
-		slog.Error("Error", err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 
@@ -111,7 +111,7 @@ func main() {
 
 	wordCount, err := readFile(file)
 	if err != nil {
-		slog.Error("Error", err)
+		slog.Error(err.Error())
 		os.Exit(1)
 	}
 
