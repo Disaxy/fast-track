@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"regexp"
@@ -89,7 +90,7 @@ func printTop10(sortedWordCount []kv) {
 		if i >= 10 {
 			break
 		}
-		slog.Info("%d. %s — %d\n", i+1, kv.key, kv.value)
+		slog.Info(fmt.Sprintf("%d. %s — %d", i+1, kv.key, kv.value))
 	}
 }
 
