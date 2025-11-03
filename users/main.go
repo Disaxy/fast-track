@@ -1,35 +1,37 @@
 package main
 
 import (
-	"fmt"
+	"github.com/Disaxy/fast-track/users/repo"
+	"github.com/Disaxy/fast-track/users/usecase"
+	"log/slog"
 	"os"
 )
 
 func main() {
-	repo := NewInMemoryUserRepo()
-	service := NewUserService(repo)
+	inMemoryRepo := repo.NewInMemoryUserRepo()
+	userUsecase := usecase.NewUserUsecase(inMemoryRepo)
 
-	newUser, err := service.CreateUser("Roma", "test@mail.com", "admin")
+	newUser, err := userUsecase.CreateUser("Roma", "test@mail.com", "admin")
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("Error", err)
 		os.Exit(1)
 	}
 
-	user, err := service.GetUser(newUser.ID)
+	user, err := userUsecase.GetUser(newUser.ID)
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("Error", err)
 		os.Exit(1)
 	}
 
-	fmt.Println(user)
-	fmt.Println(service.ListUsers())
+	slog.Info("Create user", "user", user)
+	slog.Info("List users", "users", userUsecase.ListUsers())
 
-	err = service.RemoveUser(user.ID)
+	err = userUsecase.RemoveUser(user.ID)
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("Error", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("User removed")
-	fmt.Println(service.ListUsers())
+	slog.Info("User removed")
+	slog.Info("List users", "users", userUsecase.ListUsers())
 }
