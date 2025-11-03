@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
-	"fmt"
+	"log/slog"
 	"os"
 	"regexp"
 	"sort"
@@ -84,25 +84,25 @@ func sortWordCount(wordCount map[string]int) []kv {
 }
 
 func printTop10(sortedWordCount []kv) {
-	fmt.Println("TOP-10 words:")
+	slog.Info("TOP-10 words:")
 	for i, kv := range sortedWordCount {
 		if i >= 10 {
 			break
 		}
-		fmt.Printf("%d. %s — %d\n", i+1, kv.key, kv.value)
+		slog.Info("%d. %s — %d\n", i+1, kv.key, kv.value)
 	}
 }
 
 func main() {
 	filePath, err := getFilePath()
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("Error", err)
 		os.Exit(1)
 	}
 
 	file, err := openFile(filePath)
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("Error", err)
 		os.Exit(1)
 	}
 
@@ -110,7 +110,7 @@ func main() {
 
 	wordCount, err := readFile(file)
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("Error", err)
 		os.Exit(1)
 	}
 
