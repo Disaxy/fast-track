@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"github.com/google/uuid"
-	"log/slog"
 	"time"
 )
 
@@ -11,6 +10,12 @@ var (
 	ErrTaskNotFound        = errors.New("task not found")
 	ErrTaskIsAlreadyExists = errors.New("task is already exists")
 )
+
+type TaskStorage interface {
+	GetTask(id uuid.UUID) (*Task, error)
+	AddTask(task *Task) error
+	RemoveTask(id uuid.UUID) error
+}
 
 type Task struct {
 	ID        uuid.UUID
@@ -35,9 +40,9 @@ func NewTask(text string) *Task {
 	return &task
 }
 
-type Repo map[uuid.UUID]*Task
+type MapRepo map[uuid.UUID]*Task
 
-func (repo Repo) GetTask(id uuid.UUID) (*Task, error) {
+func (repo MapRepo) GetTask(id uuid.UUID) (*Task, error) {
 	task, ok := repo[id]
 	if !ok {
 		return nil, ErrTaskNotFound
@@ -45,7 +50,7 @@ func (repo Repo) GetTask(id uuid.UUID) (*Task, error) {
 
 	return task, nil
 }
-func (repo Repo) AddTask(task *Task) error {
+func (repo MapRepo) AddTask(task *Task) error {
 	_, err := repo.GetTask(task.ID)
 	if err == nil {
 		return ErrTaskIsAlreadyExists
@@ -55,8 +60,7 @@ func (repo Repo) AddTask(task *Task) error {
 
 	return nil
 }
-
-func (repo Repo) RemoveTask(id uuid.UUID) error {
+func (repo MapRepo) RemoveTask(id uuid.UUID) error {
 	_, err := repo.GetTask(id)
 	if err != nil {
 		return err
@@ -67,49 +71,48 @@ func (repo Repo) RemoveTask(id uuid.UUID) error {
 	return nil
 }
 
-func NewRepo() *Repo {
-	repo := make(Repo)
+func NewMapRepo() *MapRepo {
+	repo := make(MapRepo)
 	return &repo
 }
 
-func main() {
-	repo := NewRepo()
-
-	task1 := NewTask("task 1")
-	task1.SetText("task 1 override")
-
-	task2 := NewTask("task 2")
-
-	_, err := repo.GetTask(task1.ID)
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
-	err = repo.RemoveTask(task1.ID)
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
-	err = repo.AddTask(task1)
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
-	err = repo.AddTask(task2)
-	if err != nil {
-		slog.Info(err.Error())
-	}
-
-	task, err := repo.GetTask(task1.ID)
-	if err != nil {
-		slog.Info(err.Error())
-	}
-	if task != nil {
-		slog.Info(task.Text)
-	}
-
-	err = repo.RemoveTask(task2.ID)
-	if err != nil {
-		slog.Info(err.Error())
-	}
+type SliceRepo struct {
+	Tasks []Task
 }
+
+func (repo *SliceRepo) GetTask(id uuid.UUID) (*Task, error) {
+	for i := range repo.Tasks {
+		if repo.Tasks[i].ID == id {
+			return &repo.Tasks[i], nil
+		}
+	}
+
+	return nil, ErrTaskNotFound
+}
+
+func (repo *SliceRepo) AddTask(task *Task) error {
+	_, err := repo.GetTask(task.ID)
+	if err == nil {
+		return ErrTaskIsAlreadyExists
+	}
+
+	repo.Tasks = append(repo.Tasks, *task)
+
+	return nil
+}
+
+func (repo *SliceRepo) RemoveTask(id uuid.UUID) error {
+	for i, task := range repo.Tasks {
+		if task.ID == id {
+			repo.Tasks = append(repo.Tasks[:i], repo.Tasks[i+1:]...)
+			return nil
+		}
+	}
+	return ErrTaskNotFound
+}
+
+func NewSliceRepo() *SliceRepo {
+	return &SliceRepo{}
+}
+
+func main() {}
